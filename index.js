@@ -62,7 +62,7 @@ class MsgRaft extends LifeRaft {
       });
     }
 
-    debug("writing packet to socket on port %s", this.address);
+    debug("writing packet to socket on port %s", this.address, fn, packet);
     this.socket.send(packet, (data) => {
       fn(undefined, data);
     });

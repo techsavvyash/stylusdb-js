@@ -4,6 +4,7 @@ const Tick = require('tick-tock');
 const ms = require('millisecond');
 const one = require('one-time');
 const emits = require('emits');
+const debug = require("diagnostics")("raft");
 
 /**
  * Generate a somewhat unique UUID.
@@ -152,6 +153,7 @@ class Raft extends EventEmitter {
         // Receive incoming messages and process them.
         //
         raft.on('data', async (packet, write) => {
+            console.log("RAHUL found in main raft file", packet)
             write = write || nope;
             var reason;
 
@@ -301,6 +303,7 @@ class Raft extends EventEmitter {
                     break;
 
                 case 'append':
+                    console.log("RAHUL present in append", packet)
                     const { term, index } = await raft.log.getLastInfo();
 
                     // We do not have the last index as our last entry
@@ -351,7 +354,7 @@ class Raft extends EventEmitter {
                 // RPC command
                 case 'rpc':
                     //TODO Check this make sure that it is called through the leader of 
-                    console.log("RAHUL in command case :", raft.leader === this.address)
+                    debug("RAHUL in command case :", raft.leader === this.address)
                     if(raft.leader === this.address){
                         await this.command(packet.data);
                     }
@@ -530,7 +533,7 @@ class Raft extends EventEmitter {
             // the FOLLOWER'S.
             //
             var packet = await raft.packet('append');
-
+            debug("In heartbeat with packet", packet);
             raft.emit('heartbeat', packet);
             raft.message(Raft.FOLLOWER, packet).heartbeat(raft.beat);
         }, duration);

@@ -62,9 +62,14 @@ function onData(data) {
   // send this data to leader
   if (raft.state !== MsgRaft.LEADER) {
     try {
+        console.log("RAHUL Received as not leader and trying to forward to leader", data);
+        // raft.message(MsgRaft.LEADER, data);
     } catch (err) {
       console.error("error while forwarding response to leader: ", err);
     }
+  }else{
+      console.log("RAHUL Received as leader and trying to append the data", data);
+      // raft.write(MsgRaft.LEADER, data);
   }
 }
 
