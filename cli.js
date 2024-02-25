@@ -13,7 +13,22 @@ const path = require('path');
 const repl = require('repl');
 const name = 'stylusdb-cli';
 const debug = require('debug')(name);
+const net = require("net");
 
+const argv = require("argh").argv;
+var axon = require("axon");
+
+var sockPush = axon.socket("req");
+let port = +argv.port || 8081; // read the port from command line arguments
+
+//Maybe we need to use net.createConnection instead of axon sockets 
+const Client = net.createConnection;
+var client = Client({port: port+ 1000});
+
+client.on("connect", ()=>{
+    console.log("client connected at port", port);
+})
+sockPush.bind(port + 100);
 
 // Custom command setup
 const fullCommands = {
@@ -171,11 +186,22 @@ const loadHistory = function loadHistory(file) {
 };
 
 function setKeyValue(key, value) {
-    console.log(`Setting ${key} to ${value}`);
+    console.log(`RAHUL Setting ${key} to ${value}`);
+    const data = {
+        [key] : value
+    }
+    sockPush.send("SET", data, ()=>{
+        console.log(`RAHUL Successfully SET the ${key} to ${value}`);
+    })
 }
 
 function getKeyValue(key) {
-    console.log(`Getting value for ${key}`);
+    console.log(`RAHUL Getting value for ${key}`);
+    const getValue = (value) =>{
+        console.log(`RAHUL Value of ${key} is ${value}`);
+        return value;
+    }
+    return sockPush.send("GET", data, getValue);
 }
 
 init();

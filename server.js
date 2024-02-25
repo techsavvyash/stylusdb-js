@@ -7,22 +7,8 @@ const MsgRaft = require("./msg-raft");
 
 /// Globals
 var sockPull = axon.socket("rep");
-const server = net.createServer();
-let activeConnection = false,
-  raftNode = undefined;
-
-//
-// We're going to start with a static list of servers. Let's start with a cluster size of
-// 5 as that only requires majority of 3 servers to have a new leader to be
-// assigned. This allows the failure of two servers.
-//
-// TODO: Figure out how to do this in BG and maybe with an orchestrator?
-const ports = [8081, 8082, 8083, 8084];
-
-// read the port from command line arguments
-let port = +argv.port || 8080;
-
-server.on("connection", (socket) => {
+const server = net.createServer(function (socket) {
+  console.log("RAHUL server connected");
   if (activeConnection) {
     // this limits to one connection at a time
     // TODO: Move to multi connections
@@ -42,6 +28,7 @@ server.on("connection", (socket) => {
   sockPull.connect(port + 100);
 
   sockPull.on("message", async (task, data, reply) => {
+    console.log("RAHUL sockPULL called".task, data);
     console.log("task: ", task);
     console.log(
       "Inside SET",
@@ -67,7 +54,7 @@ server.on("connection", (socket) => {
     } else {
       switch (task) {
         case "SET":
-          debug("Received a SET event on socket");
+          debug("RAHUL Received a SET event on socket with ", data);
           // forward to leader
           raftNode.message(
             MsgRaft.LEADER,
@@ -78,6 +65,8 @@ server.on("connection", (socket) => {
               );
             }
           );
+          reply();
+          break;
         case "GET":
           // TODO: Test for async
           debug("Received a GET event on socket");
@@ -100,6 +89,19 @@ server.on("connection", (socket) => {
     activeConnection = false;
   });
 });
+let activeConnection = false,
+  raftNode = undefined;
+
+//
+// We're going to start with a static list of servers. Let's start with a cluster size of
+// 5 as that only requires majority of 3 servers to have a new leader to be
+// assigned. This allows the failure of two servers.
+//
+// TODO: Figure out how to do this in BG and maybe with an orchestrator?
+const ports = [8081, 8082, 8083, 8084];
+
+// read the port from command line arguments
+let port = +argv.port || 8080;
 
 server.listen(port + 1000, () => {
   // raftNode is initialised whenever the server starts to listen
