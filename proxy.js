@@ -121,15 +121,6 @@ server.on("connection", (socket) => {
       chunk = chunk.substring(d_index + 1); // Cuts off the processed chunk
       d_index = chunk.indexOf("\n");
     }
-    // data = data
-    //   .toString()
-    //   .split("\n")
-    //   .map((str) => {
-    //     console.log("str: ", str);
-    //     return str.trim();
-    //   })
-    //   .filter((str) => str !== "")
-    //   .forEach((element) => {});
   });
 
   socket.on("close", () => {

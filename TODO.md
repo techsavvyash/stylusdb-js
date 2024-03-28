@@ -24,3 +24,12 @@ To browse the DB: https://www.mdbopener.com/
 
 - [ ] When we send a message from follower to leader to set a value, there is no case to command all followers to save that message
 
+
+
+## List -- 27/03/24
+
+- [ ] Implement the orchestrator
+- [ ] Fix the key skipping error
+- [ ] Add the load balancer -- figure out if proxy can do it on its on or if we need a dedicated load balancer
+- [ ] Implement updating Get-Set based on keys in a batch
+- [ ] Figure out batch size

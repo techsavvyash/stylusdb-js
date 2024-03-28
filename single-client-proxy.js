@@ -28,17 +28,29 @@ const generatePayload = (op, len) => {
   return payloads;
 };
 
-const events = [];
-events.push(...generatePayload("SET", 100_000));
-events.push(...generatePayload("GET", 100_000));
-require("fs").writeFileSync("./events.json", JSON.stringify(events));
+let nums = +argv.nums || 1000;
+const setEvents = generatePayload("SET", nums);
+const getEvents = generatePayload("GET", nums);
+
 var netSocket = net.createConnection({ port: 6767 }, () => {
   console.log("connected to server at port", 6767);
 });
 
-for (const event of events) {
-  console.log("event: ", event);
-  netSocket.write(`${uuidv4()}|` + JSON.stringify(event) + "\n");
+let setFlag = argv.set;
+let getFlag = argv.get;
+console.log("setFlag: ", setFlag);
+console.log("getFlag: ", getFlag);
+
+if (setFlag === true) {
+  for (const event of setEvents) {
+    netSocket.write(`${uuidv4()}|` + JSON.stringify(event) + "\n");
+  }
+}
+
+if (getFlag === true) {
+  for (const event of getEvents) {
+    netSocket.write(`${uuidv4()}|` + JSON.stringify(event) + "\n");
+  }
 }
 
 netSocket.on("data", (buffer) => {
