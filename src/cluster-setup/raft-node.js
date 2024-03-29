@@ -7,7 +7,7 @@
 const debug = require("diagnostics")("raft");
 
 const MsgRaft = require("./msg-raft");
-const Log = require("./raft/log");
+const Log = require("../raft/log");
 let raft = undefined;
 
 // ==== DEFINING ALL CALLBACKS HERE ==== //

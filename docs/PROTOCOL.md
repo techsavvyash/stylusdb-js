@@ -4,7 +4,18 @@ This is a set of rules that we use to distinguish between different kinds of mes
 
 ## Proxy
 This defines the types of messages we need in the proxy.
+We use the '\n' as the delimiter for the messages
 
+### 1. Request from Client
+
+Legend: "?"
+
+### 2. Response from Cluster Node
+
+Legend: "+"
+
+
+### 3. Information response from Cluster Node
 
 
 

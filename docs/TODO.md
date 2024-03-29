@@ -44,3 +44,7 @@ To browse the DB: https://www.mdbopener.com/
 - edit the "leader" fn to send a message to the proxy when the leader changes for it to know who the current leader is
 - implement a sort of load balancing to delegate requests between the raft nodes
 - figure out vs-code crashing with a lot of requests -- better memory management for the app maybe?
+
+## question
+
+- Load Balancing -- Should we have a separate load balancer? or is rotating queries at a proxy level enough?
