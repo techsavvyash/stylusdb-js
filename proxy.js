@@ -7,6 +7,7 @@
 const argv = require("argh").argv;
 const net = require("net");
 const { EventEmitter } = require("events");
+const { parseProcessRequest } = require("./utils/process-data-proxy");
 
 let port = +argv.port || 8081;
 let ports = [8081, 8082, 8083, 8084]; // read the port from command line arguments
@@ -27,11 +28,8 @@ class QueryQueue extends EventEmitter {
   }
 
   async execute(query) {
-    console.log("inside execute");
-    // currentNodeToSend = (currentNodeToSend + 1) % clients.length;
     return new Promise((resolve, reject) => {
       // write this query to socket
-      console.log("query: ", query);
       client.write(JSON.stringify(query) + "\n");
       client.on("data", (data) => {
         if (data === undefined) {
@@ -40,13 +38,7 @@ class QueryQueue extends EventEmitter {
           console.log("*****************");
         }
         if (data.toString().trim() != "Connected") {
-          console.log(
-            "data in response of proxy socket write:",
-            data.toString()
-          );
           resolve(data.toString());
-        } else {
-          console.log("data: ", data.toString());
         }
       });
 
@@ -64,7 +56,6 @@ class QueryQueue extends EventEmitter {
 
     this.execute(query)
       .then((result) => {
-        console.log("result: ", result);
         console.log("result.toString(): ", result.toString());
         if (result.toString().trim() === "error 8") {
           let e = new Error("Error 8 Another connection active trying again");
@@ -98,28 +89,21 @@ server.on("connection", (socket) => {
   activeConnection = true;
 
   socket.write("Connected\n");
-  let chunk = ""; // stores data from the stream
+
   socket.on("data", (data) => {
-    console.log("data: ", data.toString());
-    chunk += data.toString();
-    d_index = chunk.indexOf("\n");
-    while (d_index > -1) {
-      const element = chunk.substring(0, d_index);
-      console.log("element: ", element);
-      const [queryId, query] = element.trim().split("|", 2);
-      console.log("queryId ", queryId, "query ", query);
+    const queries = parseProcessRequest(data.toString(), queryQueue);
+    for (const pair of queries) {
+      const [queryId, query] = pair;
+      if (!query) continue;
       queryQueue.addQuery(queryId, query, (error, queryId, result) => {
         let response;
         if (error) {
           response = `${queryId}<|>Error: ${error.message}`;
         } else {
-          console.log("result in final formatter: ", result);
           response = `${queryId}<|>${JSON.stringify(result)}`;
         }
         socket.write(response + "\n");
       });
-      chunk = chunk.substring(d_index + 1); // Cuts off the processed chunk
-      d_index = chunk.indexOf("\n");
     }
   });
 
@@ -130,19 +114,9 @@ server.on("connection", (socket) => {
 
 server.listen(6767, () => {
   console.log("Server listening on port 6767");
-  // create TCP connection to the raft cluster leader
+  // create TCP connection to the raft cluster node
+  // TODO: Add failover -- connect to someother node if this node fails
   client = net.createConnection({ port: port + 1000 }, () => {
     console.log("connected to server at port", port + 1000);
   });
-  /*
-  // the following code reduces perf is there a better way to do this?
-  for (const port of ports) {
-    clients.push(
-      net.createConnection({ port: port + 1000 }, () => {
-        console.log("connected to server at port", port + 1000);
-      })
-    );
-  }
-  currentNodeToSend = clients.length - 1;
-  */
 });
