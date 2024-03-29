@@ -82,7 +82,7 @@ const registerNode = function (port, config = {}) {
     let log = new Log({
       adapter: require("leveldown"),
       path: `./log/${port}/`,
-    })
+    });
     raft = new MsgRaft("tcp://0.0.0.0:" + port, {
       "election min": config.min,
       "election max": config.max,
@@ -91,7 +91,7 @@ const registerNode = function (port, config = {}) {
       path: `./log/${port}/`,
       Log: log,
     });
-    log.setNode(raft)
+    log.setNode(raft);
   } catch (err) {
     console.log("error creating msgraft node: ", err);
   }
@@ -107,10 +107,8 @@ const registerNode = function (port, config = {}) {
     .on("data", onData)
     .on("commit", onCommit);
 
-  return raft;
   // TODO: Make sure that this return is by reference
-  // resolve(raft); // return the instance that we just created
-  // })
+  return raft;
 };
 
 module.exports = registerNode;

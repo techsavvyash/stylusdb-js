@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "mprocs --config ./mprocs.yml",
+    "start:dev": "mprocs --config ./mprocs.dev.yml",
+    "reset": "rm -r db log && mkdir db log",
+    "get": "node single-client-proxy.js --set false --get true",
+    "set": "node single-client-proxy.js --set true --get false",
+    "get-set": "node single-client-proxy.js --set true --get true"
   },
   "repository": {
     "type": "git",
@@ -38,5 +44,8 @@
     "rimraf": "^5.0.5",
     "tick-tock": "^1.0.0",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "mprocs": "^0.6.4"
   }
 }

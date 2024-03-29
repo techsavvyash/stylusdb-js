@@ -24,3 +24,23 @@ To browse the DB: https://www.mdbopener.com/
 
 - [ ] When we send a message from follower to leader to set a value, there is no case to command all followers to save that message
 
+
+
+## List -- 27/03/24
+
+- [ ] Implement the orchestrator
+- [ ] Fix the key skipping error
+- [ ] Add the load balancer -- figure out if proxy can do it on its on or if we need a dedicated load balancer
+- [ ] Implement updating Get-Set based on keys in a batch
+- [ ] Figure out batch size -- because we get already connected error
+
+
+## Observations
+
+- we get pauses in between sets -- is there a settimeout in teh -- log entries/indexes are getting mised 
+- figure out why are log entries are not getting updated and throwing not found error.
+- make the proxy connect to all the nodes in the cluster
+   make this fault tolerant so that there is a exponential retry incase some node goes off
+- edit the "leader" fn to send a message to the proxy when the leader changes for it to know who the current leader is
+- implement a sort of load balancing to delegate requests between the raft nodes
+- figure out vs-code crashing with a lot of requests -- better memory management for the app maybe?
