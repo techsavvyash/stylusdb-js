@@ -5,8 +5,8 @@
 const debug = require("diagnostics")("raft");
 const argv = require("argh").argv;
 
-var LifeRaft = require("./raft/index");
-const LMDBManager = require("./db");
+var LifeRaft = require("../raft/index");
+const LMDBManager = require("../storage-engine/db");
 
 let msg;
 if (argv.queue) msg = require(argv.queue);

@@ -2,8 +2,8 @@ const net = require("net");
 const argv = require("argh").argv;
 var axon = require("axon");
 
-const registerNode = require("./raft-node");
-const MsgRaft = require("./msg-raft");
+const registerNode = require("./cluster-setup/raft-node");
+const MsgRaft = require("./cluster-setup/msg-raft");
 
 /// Globals
 var sockPull = axon.socket("rep");
@@ -37,14 +37,14 @@ server.on("connection", (socket) => {
     if (pkt === undefined) {
       socket.write("undefined packet received");
     }
+    pkt = pkt.toString();
     console.log("***************************************");
     console.log("***************************************");
     console.log("RECEIVED PACKET IS: ");
-    console.log(pkt.toString());
+    console.log(pkt);
     console.log("***************************************");
     console.log("***************************************");
     pkt = pkt
-      .toString()
       .split("\n")
       .map((str) => str.trim())
       .filter((str) => {
@@ -59,7 +59,7 @@ server.on("connection", (socket) => {
     console.log(pkt);
     console.log("#########################################");
     console.log("#########################################");
-    for(const item of pkt) {
+    for (const item of pkt) {
       console.log("item in for each: ", item);
       const { task, data } = JSON.parse(item);
       if (raftNode.state === MsgRaft.LEADER) {
@@ -85,8 +85,7 @@ server.on("connection", (socket) => {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
                 let val = raftNode.db.get(cmd.key);
-                if(val == null){
-
+                if (val == null) {
                 }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
@@ -122,8 +121,7 @@ server.on("connection", (socket) => {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
                 let val = raftNode.db.get(cmd.key);
-                if(val == null){
-                  
+                if (val == null) {
                 }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
