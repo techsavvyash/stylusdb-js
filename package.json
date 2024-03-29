@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "start": "mprocs --config ./mprocs.yml",
+    "start:dev": "mprocs --config ./mprocs.dev.yml",
     "reset": "rm -r db log && mkdir db log",
     "get": "node single-client-proxy.js --set false --get true",
     "set": "node single-client-proxy.js --set true --get false",

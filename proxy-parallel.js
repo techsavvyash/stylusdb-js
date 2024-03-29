@@ -28,12 +28,12 @@ class QueryQueue extends EventEmitter {
 
   async execute(query) {
     console.log("inside execute");
-    // currentNodeToSend = (currentNodeToSend + 1) % clients.length;
+    currentNodeToSend = (currentNodeToSend + 1) % clients.length;
     return new Promise((resolve, reject) => {
       // write this query to socket
       console.log("query: ", query);
-      client.write(JSON.stringify(query) + "\n");
-      client.on("data", (data) => {
+      clients[currentNodeToSend].write(JSON.stringify(query) + "\n");
+      clients[currentNodeToSend].on("data", (data) => {
         if (data === undefined) {
           console.log("*****************");
           console.log("data is undefined");
@@ -50,8 +50,8 @@ class QueryQueue extends EventEmitter {
         }
       });
 
-      client.on("close", () => {});
-      client.on("error", reject);
+      clients[currentNodeToSend].on("close", () => {});
+      clients[currentNodeToSend].on("error", reject);
     });
   }
 
@@ -131,10 +131,10 @@ server.on("connection", (socket) => {
 server.listen(6767, () => {
   console.log("Server listening on port 6767");
   // create TCP connection to the raft cluster leader
-  client = net.createConnection({ port: port + 1000 }, () => {
-    console.log("connected to server at port", port + 1000);
-  });
-  /*
+  // client = net.createConnection({ port: port + 1000 }, () => {
+  //   console.log("connected to server at port", port + 1000);
+  // });
+  // /*
   // the following code reduces perf is there a better way to do this?
   for (const port of ports) {
     clients.push(
@@ -144,5 +144,5 @@ server.listen(6767, () => {
     );
   }
   currentNodeToSend = clients.length - 1;
-  */
+  // */
 });

@@ -156,10 +156,10 @@ class Log {
   async has(index) {
     try {
       const entry = await this.db.get(index);
-      //   if (!entry) return false;
+      if (!entry) return false;
       return true;
     } catch (err) {
-      console.log("error fetching key from db for index: ", index, err);
+      console.log("error fetching key from db for index: ", index);
       return false;
     }
   }
