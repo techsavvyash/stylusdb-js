@@ -40,9 +40,10 @@ server.on("connection", (socket) => {
       socket.write("undefined packet received");
     }
     pkt = parseServerStream(pkt);
+    console.log("pkt: ", pkt);
     for (const item of pkt) {
-      const task = item.valueForKeyPath("task");
-      const data = item.valueForKeyPath("data");
+      console.log("item: ", item);
+      const { task, data } = item;
       console.log("task: ", task);
       if (raftNode.state === MsgRaft.LEADER) {
         switch (task) {

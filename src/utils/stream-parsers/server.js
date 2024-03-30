@@ -2,6 +2,7 @@
  * @description This file contains functions to parse the TCP stream strings
  */
 const simdjson = require("simdjson");
+
 /**
  *
  * @param {Buffer} pkt TCP stream buffer data
@@ -15,9 +16,8 @@ function parseServerStream(pkt) {
       return str.trim() !== "";
     })
     .map((item) => {
-      const parsedItem = simdjson.lazyParse(item.trim());
-      console.log("parsedItem: ", parsedItem);
-      return JSON.parse(item.trim());
+      item = item.trim();
+      return simdjson.lazyParse(item).valueForKeyPath("");
     });
 }
 
