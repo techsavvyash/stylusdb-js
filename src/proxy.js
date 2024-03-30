@@ -7,7 +7,7 @@
 const argv = require("argh").argv;
 const net = require("net");
 const { EventEmitter } = require("events");
-const { parseProcessRequest } = require("./utils/process-data-proxy");
+const { parseProcessRequest } = require("./utils/stream-parsers/proxy");
 
 let port = +argv.port || 8081;
 let ports = [8081, 8082, 8083, 8084]; // read the port from command line arguments
@@ -30,14 +30,10 @@ class QueryQueue extends EventEmitter {
   async execute(query) {
     return new Promise((resolve, reject) => {
       // write this query to socket
-      client.write(JSON.stringify(query) + "\n");
+      console.log("query in execute: ", query);
+      client.write(query + "\n");
       client.on("data", (data) => {
-        if (data === undefined) {
-          console.log("*****************");
-          console.log("data is undefined");
-          console.log("*****************");
-        }
-        if (data.toString().trim() != "Connected") {
+        if (data && data.toString().trim() != "Connected") {
           resolve(data.toString());
         }
       });
@@ -93,6 +89,7 @@ server.on("connection", (socket) => {
   socket.on("data", (data) => {
     const queries = parseProcessRequest(data.toString(), queryQueue);
     for (const pair of queries) {
+      console.log("pair: ", pair);
       const [queryId, query] = pair;
       if (!query) continue;
       queryQueue.addQuery(queryId, query, (error, queryId, result) => {

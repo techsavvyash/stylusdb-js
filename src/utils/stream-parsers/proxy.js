@@ -9,7 +9,6 @@ function parseProcessRequest(data, queryQueue) {
   d_index = chunk.indexOf("\n");
   while (d_index > -1) {
     const element = chunk.substring(0, d_index);
-    console.log("element: ", element);
     const [queryId, query] = element.trim().split("|", 2);
     console.log("queryId ", queryId, "query ", query);
     res.push([queryId, query]);

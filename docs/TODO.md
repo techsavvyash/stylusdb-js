@@ -48,3 +48,4 @@ To browse the DB: https://www.mdbopener.com/
 ## question
 
 - Load Balancing -- Should we have a separate load balancer? or is rotating queries at a proxy level enough?
+- Bug: Data is not being stored between restarts
