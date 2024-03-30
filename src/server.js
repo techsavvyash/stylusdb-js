@@ -1,9 +1,11 @@
 const net = require("net");
 const argv = require("argh").argv;
 var axon = require("axon");
+const simdjson = require("simdjson");
 
 const registerNode = require("./cluster-setup/raft-node");
 const MsgRaft = require("./cluster-setup/msg-raft");
+const { parseServerStream } = require("./utils/stream-parsers/server");
 
 /// Globals
 var sockPull = axon.socket("rep");
@@ -37,31 +39,11 @@ server.on("connection", (socket) => {
     if (pkt === undefined) {
       socket.write("undefined packet received");
     }
-    pkt = pkt.toString();
-    console.log("***************************************");
-    console.log("***************************************");
-    console.log("RECEIVED PACKET IS: ");
-    console.log(pkt);
-    console.log("***************************************");
-    console.log("***************************************");
-    pkt = pkt
-      .split("\n")
-      .map((str) => str.trim())
-      .filter((str) => {
-        return str.trim() !== "";
-      })
-      .map((item) => {
-        return JSON.parse(item.trim());
-      });
-    console.log("#########################################");
-    console.log("#########################################");
-    console.log("RECEIVED PACKET AFTER SPLITTING IS: ");
-    console.log(pkt);
-    console.log("#########################################");
-    console.log("#########################################");
+    pkt = parseServerStream(pkt);
     for (const item of pkt) {
-      console.log("item in for each: ", item);
-      const { task, data } = JSON.parse(item);
+      const task = item.valueForKeyPath("task");
+      const data = item.valueForKeyPath("data");
+      console.log("task: ", task);
       if (raftNode.state === MsgRaft.LEADER) {
         switch (task) {
           case "SET":

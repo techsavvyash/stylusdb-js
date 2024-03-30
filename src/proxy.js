@@ -7,7 +7,7 @@
 const argv = require("argh").argv;
 const net = require("net");
 const { EventEmitter } = require("events");
-const { parseProcessRequest } = require("./utils/process-data-proxy");
+const { parseProcessRequest } = require("./utils/stream-parsers/proxy");
 
 let port = +argv.port || 8081;
 let ports = [8081, 8082, 8083, 8084]; // read the port from command line arguments
