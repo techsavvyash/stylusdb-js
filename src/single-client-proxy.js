@@ -41,19 +41,83 @@ let getFlag = argv.get;
 console.log("setFlag: ", setFlag);
 console.log("getFlag: ", getFlag);
 
+const total_queries = nums + (getFlag & setFlag) * nums;
+
+const benchmarks = {
+  start: {},
+  end: {},
+};
+
 if (setFlag === true) {
   for (const event of setEvents) {
-    netSocket.write(`${uuidv4()}|` + JSON.stringify(event) + "\n");
+    const queryId = uuidv4();
+    benchmarks.start[queryId] = {
+      type: "SET",
+      start: performance.now(),
+    };
+    netSocket.write(`${queryId}|` + JSON.stringify(event) + "\n");
   }
 }
 
 if (getFlag === true) {
   for (const event of getEvents) {
-    netSocket.write(`${uuidv4()}|` + JSON.stringify(event) + "\n");
+    const queryId = uuidv4();
+    benchmarks.start[queryId] = {
+      type: "GET",
+      start: performance.now(),
+    };
+    netSocket.write(`${queryId}|` + JSON.stringify(event) + "\n");
   }
 }
 
 netSocket.on("data", (buffer) => {
+  const t = performance.now();
   const data = buffer.toString("utf8");
+  console.log("data in the start: ", data);
+  // require("fs").writeFileSync(`./data/data-${Date.now()}.txt`, data, "utf-8");
+  data
+    .split("\n")
+    .map((q) => {
+      if (q.trim() != "Connected") {
+        return q.split("<|>")[0].trim();
+      }
+    })
+    .forEach((queryId) => {
+      console.log("queryId: ", queryId);
+      if (queryId && queryId.length && queryId == "ENDENDEND") {
+        console.log(
+          "Object.keys(benchmarks.end).length before ending: ",
+          Object.keys(benchmarks.end).length
+        );
+        require("fs").writeFileSync(
+          `./benchmarks/${new Date(Date.now())}.json`,
+          JSON.stringify(benchmarks),
+          "utf-8"
+        );
+        // netSocket.destroy();
+        return;
+      }
+      if (
+        queryId &&
+        queryId.trim().length &&
+        queryId.trim() != "Connected" &&
+        queryId.trim() != "ENDENDEND"
+      ) {
+        benchmarks.end[queryId] = t;
+        console.log(
+          "Object.keys(benchmarks.end).length: ",
+          Object.keys(benchmarks.end).length
+        );
+      }
+    });
+
   console.log(data);
+  if (Object.keys(benchmarks.end).length === total_queries) {
+    require("fs").writeFileSync(
+      `./benchmarks/${new Date(Date.now())}.json`,
+      JSON.stringify(benchmarks),
+      "utf-8"
+    );
+    netSocket.destroy();
+  }
 });
