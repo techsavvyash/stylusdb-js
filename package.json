@@ -27,6 +27,8 @@
     "argh": "^0.1.4",
     "assume": "^2.3.0",
     "axon": "2.0.x",
+    "chart.js": "^3.9.1",
+    "chartjs-node-canvas": "^4.1.6",
     "diagnostics": "1.1.x",
     "emits": "^3.0.0",
     "encoding-down": "^6.3.0",
