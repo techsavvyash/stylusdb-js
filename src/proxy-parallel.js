@@ -7,12 +7,11 @@
 const argv = require("argh").argv;
 const net = require("net");
 const { EventEmitter } = require("events");
+const { parseProcessRequest } = require("./utils/stream-parsers/proxy");
 
-let port = +argv.port || 8081;
 let ports = [8081, 8082, 8083, 8084]; // read the port from command line arguments
 let clients = [];
 let currentNodeToSend = 0;
-let client = null;
 
 class QueryQueue extends EventEmitter {
   constructor() {
@@ -98,28 +97,22 @@ server.on("connection", (socket) => {
   activeConnection = true;
 
   socket.write("Connected\n");
-  let chunk = ""; // stores data from the stream
+
   socket.on("data", (data) => {
-    console.log("data: ", data.toString());
-    chunk += data.toString();
-    d_index = chunk.indexOf("\n");
-    while (d_index > -1) {
-      const element = chunk.substring(0, d_index);
-      console.log("element: ", element);
-      const [queryId, query] = element.trim().split("|", 2);
-      console.log("queryId ", queryId, "query ", query);
+    const queries = parseProcessRequest(data.toString(), queryQueue);
+    for (const pair of queries) {
+      console.log("pair: ", pair);
+      const [queryId, query] = pair;
+      if (!query) continue;
       queryQueue.addQuery(queryId, query, (error, queryId, result) => {
         let response;
         if (error) {
           response = `${queryId}<|>Error: ${error.message}`;
         } else {
-          console.log("result in final formatter: ", result);
           response = `${queryId}<|>${JSON.stringify(result)}`;
         }
         socket.write(response + "\n");
       });
-      chunk = chunk.substring(d_index + 1); // Cuts off the processed chunk
-      d_index = chunk.indexOf("\n");
     }
   });
 
@@ -130,12 +123,7 @@ server.on("connection", (socket) => {
 
 server.listen(6767, () => {
   console.log("Server listening on port 6767");
-  // create TCP connection to the raft cluster leader
-  // client = net.createConnection({ port: port + 1000 }, () => {
-  //   console.log("connected to server at port", port + 1000);
-  // });
-  // /*
-  // the following code reduces perf is there a better way to do this?
+
   for (const port of ports) {
     clients.push(
       net.createConnection({ port: port + 1000 }, () => {
@@ -144,5 +132,4 @@ server.listen(6767, () => {
     );
   }
   currentNodeToSend = clients.length - 1;
-  // */
 });

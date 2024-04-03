@@ -48,6 +48,16 @@ const benchmarks = {
   end: {},
 };
 
+process.on("SIGINT", () => {
+  require("fs").writeFileSync(
+    `./benchmarks/${new Date(Date.now())}-sigint.json`,
+    JSON.stringify(benchmarks),
+    "utf-8"
+  );
+  netSocket.destroy();
+  process.exit(0);
+});
+
 if (setFlag === true) {
   for (const event of setEvents) {
     const queryId = uuidv4();

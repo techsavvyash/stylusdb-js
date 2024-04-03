@@ -17,7 +17,8 @@ function parseServerStream(pkt) {
     })
     .map((item) => {
       item = item.trim();
-      return simdjson.lazyParse(item).valueForKeyPath("");
+      // return simdjson.lazyParse(item).valueForKeyPath("");
+      return JSON.parse(item);
     });
 }
 

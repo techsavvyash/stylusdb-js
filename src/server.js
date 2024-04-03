@@ -41,8 +41,11 @@ server.on("connection", (socket) => {
     }
     pkt = parseServerStream(pkt);
     console.log("pkt: ", pkt);
-    for (const item of pkt) {
+    for (let item of pkt) {
       console.log("item: ", item);
+      if (typeof item === "string") item = JSON.parse(item);
+      console.log("item.task: ", item.task);
+      console.log("item.data: ", item.data);
       const { task, data } = item;
       console.log("task: ", task);
       if (raftNode.state === MsgRaft.LEADER) {
