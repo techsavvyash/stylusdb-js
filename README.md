@@ -7,8 +7,8 @@ Modify `config.json`
 
 ### Installation
 ```sh
-nvm install 16
-nvm use 16
+nvm install 18
+nvm use 18
 npm install
 ```
 
@@ -16,24 +16,18 @@ npm install
 
 Create the following 6 directories before contiuing to start the server below:
 ```bash
-mkdir -p db/8081 db/8082 db/8083 db/8084 log
+mkdir db log
 ```
 
 
 ### Starting Server
-Open four terminals and start a 4 node cluster.
 
 ```sh
-DEBUG=* node server.js --port 8081
-DEBUG=* node server.js --port 8082
-DEBUG=* node server.js --port 8083
-DEBUG=* node server.js --port 8084
+npm run start
 ```
 
-for windows cmd
-```
-set DEBUG=* & node server.js --port 8081
-```
+This will start a 4 node raft cluster, a proxy server and a user-shell in a [mprocs](https://github.com/pvolok/mprocs) tui for you to develop easily.
+
 
 ### Benchmarks
 Coming soon 
