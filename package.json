@@ -8,6 +8,7 @@
     "test": "jest",
     "start": "mprocs --config ./config/mprocs.yml",
     "start:dev": "mprocs --config ./config/mprocs.dev.yml",
+    "prepare": "mkdr db log benchmarks",
     "reset": "rm -r db log && mkdir db log",
     "get": "node ./src/single-client-proxy.js --set false --get true",
     "set": "node ./src/single-client-proxy.js --set true --get false",
@@ -18,7 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/ChakshuGautam/stylusdb-js.git"
   },
-  "author": "ChakshuGautam",
+  "author": "Yash Mittal (@techsavvyash), Rahul Shrimali (@rahul-shrimali), Chakshu Gautam (@ChakshuGautam)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ChakshuGautam/stylusdb-js/issues"
