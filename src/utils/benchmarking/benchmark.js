@@ -5,8 +5,7 @@ const fs = require("fs");
 const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
 const argv = require("argh").argv;
 
-const jsonName = argv.name || "json1"
-
+const jsonName = argv.name || "json1";
 
 function generateBenchmarks(jsonPath) {
   const rawBenchmarkData = JSON.parse(fs.readFileSync(jsonPath));
@@ -23,12 +22,15 @@ function generateBenchmarks(jsonPath) {
   let removed_entries = 0;
   let lastEntry = undefined;
   for (let query_id in rawBenchmarkData["end"]) {
-    if (typeof rawBenchmarkData.end[query_id] !== "undefined" && lastEntry !== undefined && typeof query_data[query_id] !== "undefined") {
-      query_data[query_id].time =
-        rawBenchmarkData.end[query_id] - lastEntry;
-    }else{
-        removed_entries++;
-        delete query_data[query_id];
+    if (
+      typeof rawBenchmarkData.end[query_id] !== "undefined" &&
+      lastEntry !== undefined &&
+      typeof query_data[query_id] !== "undefined"
+    ) {
+      query_data[query_id].time = rawBenchmarkData.end[query_id] - lastEntry;
+    } else {
+      removed_entries++;
+      delete query_data[query_id];
     }
     lastEntry = rawBenchmarkData.end[query_id];
   }
@@ -93,14 +95,32 @@ async function make_graph(jsonPath) {
       labels: labels,
       datasets: [
         {
-          label: "Sample 1",
+          // label: "Sample 1",
           data: data1,
           fill: false,
           borderColor: ["rgb(51, 204, 204)"],
           borderWidth: 1,
-          xAxisID: "xAxis1", //define top or bottom axis ,modifies on scale
-        }
+          // xAxisID: "xAxis1", //define top or bottom axis ,modifies on scale
+        },
       ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Response Time (in ms)", // Add your unit here
+          },
+        },
+        x: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Request Number", // Add your unit here
+          },
+        },
+      },
     },
   };
 
@@ -118,11 +138,16 @@ async function make_graph(jsonPath) {
 
   var base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
   console.log(jsonName);
-  fs.writeFile(`./src/utils/benchmarking/graph/out-${jsonName}.png`, base64Data, "base64", function (err) {
-    if (err) {
-      console.log(err);
+  fs.writeFile(
+    `./src/utils/benchmarking/graph/out-${jsonName}.png`,
+    base64Data,
+    "base64",
+    function (err) {
+      if (err) {
+        console.log(err);
+      }
     }
-  });
+  );
   return dataUrl;
 }
 
