@@ -37,6 +37,10 @@ function generateBenchmarks(jsonPath) {
 
   console.log("\nRunning time of each query is : \n");
   console.table(query_data);
+  fs.writeFileSync(
+    `./docs/appendix/runtimes/${jsonName}.json`,
+    JSON.stringify(query_data, null, 2)
+  );
 
   let total_set = 0;
   let total_get = 0;
