@@ -69,10 +69,4 @@ class MsgRaft extends LifeRaft {
   }
 }
 
-// TODO: a setInterval loop to commit the logs to followers every 5 seconds
-
-// setInterval(async () => {
-//   // logic to send commit events here
-// }, 5000);
-
 module.exports = MsgRaft;

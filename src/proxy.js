@@ -9,7 +9,7 @@ const net = require("net");
 const { EventEmitter } = require("events");
 const { parseProcessRequest } = require("./utils/stream-parsers/proxy");
 
-let port = +argv.port || 8081;
+let port = +argv.port || 8084;
 let ports = [8081, 8082, 8083, 8084]; // read the port from command line arguments
 let clients = [];
 let currentNodeToSend = 0;
@@ -115,5 +115,27 @@ server.listen(6767, () => {
   // TODO: Add failover -- connect to someother node if this node fails
   client = net.createConnection({ port: port + 1000 }, () => {
     console.log("connected to server at port", port + 1000);
+    client.write(
+      JSON.stringify({
+        task: "LEADER",
+        data: {},
+      })
+    );
+
+    client.on("data", (data) => {
+      console.log("result of leader request: ", data.toString());
+      const tcpRegex = /^tcp:\/\/(\d{1,3}\.){3}\d{1,3}:\d{1,5}$/;
+      if (data.toString() != "Connected" && tcpRegex.test(data.toString())) {
+        console.log("result of leader request: ", data.toString());
+
+        port = data.toString().split("tcp://0.0.0.0:")[1];
+        console.log("port: ", port);
+
+        client.destroy();
+        client = net.createConnection({ port: +port + 1000 }, () => {
+          console.log("connected to server at port", port);
+        });
+      }
+    });
   });
 });

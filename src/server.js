@@ -48,16 +48,23 @@ server.on("connection", (socket) => {
       console.log("item.data: ", item.data);
       const { task, data } = item;
       console.log("task: ", task);
+
       if (raftNode.state === MsgRaft.LEADER) {
         switch (task) {
+          case "LEADER":
+            console.log("raft cluster leader: ", raftNode.leader);
+            socket.write(raftNode.leader);
+            break;
           case "SET":
             // TODO: Test for async
             try {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
                 cmd["type"] = "SET";
-                await raftNode.command(cmd);
-                socket.write(`${JSON.stringify(cmd)} - ack`);
+                await raftNode.command(cmd).then((res) => {
+                  console.log("res in set raft.command", res);
+                  socket.write(`${JSON.stringify(cmd)} - ack`);
+                });
               } else {
                 throw new Error("Invalid data format");
               }
@@ -71,8 +78,6 @@ server.on("connection", (socket) => {
               if (data && data.length > 0) {
                 let cmd = data[0].command;
                 let val = raftNode.db.get(cmd.key);
-                if (val == null) {
-                }
                 socket.write(`Value of key : ${cmd.key} is ${val}`);
               } else {
                 throw new Error("Invalid data format");
@@ -90,6 +95,10 @@ server.on("connection", (socket) => {
         }
       } else {
         switch (task) {
+          case "LEADER":
+            console.log("raft cluster leader: ", raftNode.leader);
+            socket.write(raftNode.leader);
+            break;
           case "SET":
             let cmd = data[0].command;
             cmd["type"] = "SET";

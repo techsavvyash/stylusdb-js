@@ -8,6 +8,8 @@
     "test": "jest",
     "start": "mprocs --config ./config/mprocs.yml",
     "start:dev": "mprocs --config ./config/mprocs.dev.yml",
+    "proxy": "node src/proxy.js",
+    "proxy-parallel": "node src/proxy-parallel.js",
     "prepare": "mkdir db log benchmarks",
     "reset": "rm -r db log && mkdir db log",
     "get": "node ./src/single-client-proxy.js --set false --get true",

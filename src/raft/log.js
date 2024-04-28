@@ -31,17 +31,9 @@ class Log {
   constructor({ adapter = require("leveldown"), path = "" }) {
     // this.node = node;
     this.committedIndex = 0;
-    // this.db = levelup(encode(adapter(path), { valueEncoding: 'json', keyEncoding: 'binary' }));
-    try {
-      this.db = levelup(
-        encode(adapter(path), { valueEncoding: "json", keyEncoding }),
-        {
-          cacheSize: 100 * 1024 * 1024,
-        }
-      );
-    } catch (err) {
-      console.log("error initialising db adapter for logs in raft: ", err);
-    }
+    this.db = levelup(
+      encode(adapter(path), { valueEncoding: "json", keyEncoding: "binary" })
+    );
     this.commandAckQueue = new PromiseQueue(1, Infinity);
   }
 

@@ -1,0 +1,2 @@
+10K - 36mins -- initially fast, congestion when leader changed mid processing
+      3m57s  -- no re-election in between
