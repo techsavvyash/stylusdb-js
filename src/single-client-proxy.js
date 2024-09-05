@@ -6,6 +6,77 @@ const argv = require("argh").argv;
 const net = require("net");
 const { v4: uuidv4 } = require("uuid");
 
+function generateBenchmarks(rawBenchmarkData) {
+  // const rawBenchmarkData = JSON.parse(fs.readFileSync(jsonPath));
+
+  let query_data = {};
+  for (let query_id in rawBenchmarkData["start"]) {
+    const entry = rawBenchmarkData.start[query_id];
+    query_data[query_id] = {
+      type: entry.type,
+      time: 0.0,
+    };
+  }
+
+  let removed_entries = 0;
+  let lastEntry = undefined;
+  for (let query_id in rawBenchmarkData["end"]) {
+    if (
+      typeof rawBenchmarkData.end[query_id] !== "undefined" &&
+      lastEntry !== undefined &&
+      typeof query_data[query_id] !== "undefined"
+    ) {
+      query_data[query_id].time = rawBenchmarkData.end[query_id] - lastEntry;
+    } else {
+      removed_entries++;
+      delete query_data[query_id];
+    }
+    lastEntry = rawBenchmarkData.end[query_id];
+  }
+
+  console.log("\nRunning time of each query is : \n");
+  console.table(query_data);
+  // fs.writeFileSync(
+  //   `./docs/appendix/runtimes/${jsonName}.json`,
+  //   JSON.stringify(query_data, null, 2)
+  // );
+
+  let total_set = 0;
+  let total_get = 0;
+  let set_query_count = 0;
+  let get_query_count = 0;
+
+  for (let id in query_data) {
+    let curr_ele = query_data[id];
+    if (curr_ele["type"] === "SET") {
+      set_query_count++;
+      total_set += parseFloat(curr_ele["time"]);
+    } else {
+      get_query_count++;
+      total_get += parseFloat(curr_ele["time"]);
+    }
+  }
+
+  if (set_query_count) {
+    console.log(
+      "\nAverage time required in SET operation : ",
+      total_set / set_query_count,
+      "\n"
+    );
+  }
+  if (get_query_count) {
+    console.log(
+      "\nAverage time required in GET operation : ",
+      total_get / get_query_count,
+      "\n"
+    );
+  }
+
+  console.log("Removed entries : ", removed_entries);
+
+  return query_data;
+}
+
 const givePayloadSkeleton = (op, key, val = null) => {
   return {
     task: op,
@@ -49,6 +120,7 @@ const benchmarks = {
 };
 
 process.on("SIGINT", () => {
+  generateBenchmarks(benchmarks);
   require("fs").writeFileSync(
     `./benchmarks/${new Date(Date.now())}-sigint.json`,
     JSON.stringify(benchmarks),
@@ -99,6 +171,7 @@ netSocket.on("data", (buffer) => {
           "Object.keys(benchmarks.end).length before ending: ",
           Object.keys(benchmarks.end).length
         );
+        generateBenchmarks(benchmarks);
         require("fs").writeFileSync(
           `./benchmarks/${new Date(Date.now())}.json`,
           JSON.stringify(benchmarks),
@@ -123,6 +196,7 @@ netSocket.on("data", (buffer) => {
 
   console.log(data);
   if (Object.keys(benchmarks.end).length === total_queries) {
+    generateBenchmarks(benchmarks);
     require("fs").writeFileSync(
       `./benchmarks/${new Date(Date.now())}.json`,
       JSON.stringify(benchmarks),
